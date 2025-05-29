@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'dart:ui';
 
 class UserDetailView extends StatefulWidget {
   const UserDetailView({Key? key}) : super(key: key);
@@ -12,13 +13,26 @@ class UserDetailView extends StatefulWidget {
 class _UserDetailViewState extends State<UserDetailView>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  bool isFriend = false;
+  bool isFollowing = false;
   bool isPendingRequest = false;
+  late Map<String, dynamic> userData;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 2, vsync: this);
+    userData = Get.arguments ??
+        {
+          'userId': '',
+          'username': '',
+          'fullName': '',
+          'avatar': '',
+          'followers': '',
+          'following': '',
+          'posts': '',
+          'bio': '',
+          'isVerified': false,
+        };
   }
 
   @override
@@ -29,92 +43,244 @@ class _UserDetailViewState extends State<UserDetailView>
 
   @override
   Widget build(BuildContext context) {
-    final Map<String, dynamic> user = Get.arguments ?? {};
-
     return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () => Get.back(),
+        ),
+        centerTitle: true,
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              userData['name'] ?? 'username',
+              style: GoogleFonts.poppins(
+                color: Colors.black,
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            if (userData['isVerified'] == true)
+              Padding(
+                padding: const EdgeInsets.only(left: 4),
+                child: Icon(Icons.verified, color: Colors.blue[500], size: 20),
+              ),
+          ],
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.more_vert, color: Colors.black),
+            onPressed: () {},
+          ),
+        ],
+      ),
       body: NestedScrollView(
         headerSliverBuilder: (context, innerBoxIsScrolled) {
           return [
-            SliverAppBar(
-              expandedHeight: 300,
-              pinned: true,
-              flexibleSpace: FlexibleSpaceBar(
-                background: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    Image.network(
-                      user['coverImage'] ?? 'https://picsum.photos/800/600',
-                      fit: BoxFit.cover,
-                    ),
-                    Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            Colors.transparent,
-                            Colors.black.withOpacity(0.7),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
             SliverToBoxAdapter(
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Transform.translate(
-                    offset: const Offset(0, -40),
-                    child: CircleAvatar(
-                      radius: 50,
-                      backgroundImage: NetworkImage(user['avatar'] ?? ''),
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 86,
+                          height: 86,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: const LinearGradient(
+                              colors: [
+                                Colors.purple,
+                                Colors.orange,
+                                Colors.pink,
+                              ],
+                              begin: Alignment.topRight,
+                              end: Alignment.bottomLeft,
+                            ),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(3),
+                            child: Container(
+                              decoration: const BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.white,
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(2),
+                                child: CircleAvatar(
+                                  backgroundImage: NetworkImage(
+                                    userData['avatar'] ??
+                                        'https://picsum.photos/200/200',
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 24),
+                        Expanded(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              _buildStatColumn(
+                                  userData['posts'] ?? '0', 'posts'),
+                              _buildStatColumn(
+                                  userData['followers'] ?? '0', 'followers'),
+                              _buildStatColumn(
+                                  userData['following'] ?? '0', 'following'),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  Text(
-                    user['name'] ?? 'User Name',
-                    style: GoogleFonts.poppins(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  Text(
-                    user['username'] ?? '@username',
-                    style: GoogleFonts.poppins(
-                      color: Colors.grey[600],
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          userData['name'] ?? '',
+                          style: GoogleFonts.poppins(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        if (userData['bio'] != null &&
+                            userData['bio'].isNotEmpty) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            userData['bio'],
+                            style: GoogleFonts.poppins(
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ],
+                        const SizedBox(height: 4),
+                        Text(
+                          '${userData['username'] ?? 'username'}',
+                          style: GoogleFonts.poppins(
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  setState(() {
+                                    if (!isFollowing && !isPendingRequest) {
+                                      isPendingRequest = true;
+                                    }
+                                  });
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor:
+                                      isPendingRequest || isFollowing
+                                          ? Colors.grey[200]
+                                          : Colors.blue,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                ),
+                                child: Text(
+                                  isPendingRequest
+                                      ? 'Requested'
+                                      : (isFollowing ? 'Following' : 'Follow'),
+                                  style: GoogleFonts.poppins(
+                                    color: isPendingRequest || isFollowing
+                                        ? Colors.black
+                                        : Colors.white,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: OutlinedButton(
+                                onPressed: () {},
+                                style: OutlinedButton.styleFrom(
+                                  side: BorderSide(color: Colors.grey[300]!),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                ),
+                                child: Text(
+                                  'Message',
+                                  style: GoogleFonts.poppins(
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            OutlinedButton(
+                              onPressed: () {},
+                              style: OutlinedButton.styleFrom(
+                                side: BorderSide(color: Colors.grey[300]!),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 12),
+                              ),
+                              child: const Icon(Icons.person_add,
+                                  color: Colors.black, size: 20),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(height: 16),
-                  if (!isFriend)
-                    ElevatedButton.icon(
-                      onPressed: isPendingRequest
-                          ? null
-                          : () {
-                              setState(() {
-                                isPendingRequest = true;
-                              });
-                            },
-                      icon: Icon(
-                        isPendingRequest
-                            ? Icons.hourglass_empty
-                            : Icons.person_add,
-                      ),
-                      label: Text(
-                        isPendingRequest ? 'Request Sent' : 'Add Friend',
-                        style: GoogleFonts.poppins(),
-                      ),
-                    ),
-                  const SizedBox(height: 24),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        _buildStat('Posts', '156'),
-                        _buildStat('Friends', '2.3K'),
-                        _buildStat('Following', '1.1K'),
-                      ],
+                      children: List.generate(4, (index) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          child: Column(
+                            children: [
+                              Container(
+                                width: 64,
+                                height: 64,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: Colors.grey[300]!,
+                                    width: 2,
+                                  ),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(2),
+                                  child: CircleAvatar(
+                                    backgroundImage: NetworkImage(
+                                      'https://picsum.photos/200/200?random=$index',
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Story $index',
+                                style: GoogleFonts.poppins(
+                                  color: Colors.grey[600],
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -125,14 +291,12 @@ class _UserDetailViewState extends State<UserDetailView>
               delegate: _SliverAppBarDelegate(
                 TabBar(
                   controller: _tabController,
-                  labelStyle: GoogleFonts.poppins(
-                    fontWeight: FontWeight.w600,
-                  ),
-                  unselectedLabelStyle: GoogleFonts.poppins(),
+                  labelColor: Colors.black,
+                  unselectedLabelColor: Colors.grey,
+                  indicatorColor: Colors.black,
                   tabs: const [
-                    Tab(text: 'Photos'),
-                    Tab(text: 'Videos'),
-                    Tab(text: 'Interests'),
+                    Tab(icon: Icon(Icons.grid_on)),
+                    Tab(icon: Icon(Icons.person_pin_outlined)),
                   ],
                 ),
               ),
@@ -140,16 +304,8 @@ class _UserDetailViewState extends State<UserDetailView>
             ),
           ];
         },
-        body: isFriend
-            ? TabBarView(
-                controller: _tabController,
-                children: [
-                  _buildPhotosGrid(),
-                  _buildVideosGrid(),
-                  _buildInterestsList(),
-                ],
-              )
-            : Center(
+        body: !isFollowing && !isPendingRequest
+            ? Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -160,33 +316,85 @@ class _UserDetailViewState extends State<UserDetailView>
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      'This content is private',
+                      'This Account is Private',
                       style: GoogleFonts.poppins(
+                        color: Colors.black,
                         fontSize: 20,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Add friend to see photos, videos and interests',
+                      'Follow this account to see their photos\nand videos.',
+                      textAlign: TextAlign.center,
                       style: GoogleFonts.poppins(
                         color: Colors.grey[600],
                       ),
                     ),
                   ],
                 ),
+              )
+            : Stack(
+                children: [
+                  TabBarView(
+                    controller: _tabController,
+                    children: [
+                      _buildPostsGrid(),
+                      _buildTaggedGrid(),
+                    ],
+                  ),
+                  if (!isFollowing && isPendingRequest)
+                    ClipRect(
+                      child: BackdropFilter(
+                        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                        child: Container(
+                          color: Colors.white.withOpacity(0.7),
+                          child: Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.hourglass_empty,
+                                  size: 64,
+                                  color: Colors.grey[400],
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  'Request Pending',
+                                  style: GoogleFonts.poppins(
+                                    color: Colors.black,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  'Content will be visible once the\nrequest is accepted.',
+                                  textAlign: TextAlign.center,
+                                  style: GoogleFonts.poppins(
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
               ),
       ),
     );
   }
 
-  Widget _buildStat(String label, String value) {
+  Widget _buildStatColumn(String value, String label) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         Text(
           value,
           style: GoogleFonts.poppins(
-            fontSize: 20,
+            fontSize: 18,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -200,132 +408,37 @@ class _UserDetailViewState extends State<UserDetailView>
     );
   }
 
-  Widget _buildPhotosGrid() {
+  Widget _buildPostsGrid() {
     return GridView.builder(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.zero,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3,
-        mainAxisSpacing: 8,
-        crossAxisSpacing: 8,
-      ),
-      itemCount: 12,
-      itemBuilder: (context, index) {
-        return Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8),
-            image: DecorationImage(
-              image: NetworkImage(
-                'https://picsum.photos/200?random=$index',
-              ),
-              fit: BoxFit.cover,
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildVideosGrid() {
-    return GridView.builder(
-      padding: const EdgeInsets.all(16),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        mainAxisSpacing: 16,
-        crossAxisSpacing: 16,
-        childAspectRatio: 16 / 9,
+        crossAxisSpacing: 1,
+        mainAxisSpacing: 1,
       ),
       itemCount: 6,
       itemBuilder: (context, index) {
-        return Stack(
-          fit: StackFit.expand,
-          children: [
-            Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                image: DecorationImage(
-                  image: NetworkImage(
-                    'https://picsum.photos/400/225?random=$index',
-                  ),
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-            Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                color: Colors.black.withOpacity(0.3),
-              ),
-            ),
-            const Center(
-              child: Icon(
-                Icons.play_circle_outline,
-                size: 48,
-                color: Colors.white,
-              ),
-            ),
-          ],
+        return Image.network(
+          'https://picsum.photos/300/300?random=$index',
+          fit: BoxFit.cover,
         );
       },
     );
   }
 
-  Widget _buildInterestsList() {
-    final List<Map<String, dynamic>> interests = [
-      {
-        'icon': Icons.sports_basketball,
-        'name': 'Basketball',
-        'color': Colors.orange,
-      },
-      {
-        'icon': Icons.music_note,
-        'name': 'Music',
-        'color': Colors.purple,
-      },
-      {
-        'icon': Icons.camera_alt,
-        'name': 'Photography',
-        'color': Colors.blue,
-      },
-      {
-        'icon': Icons.restaurant,
-        'name': 'Cooking',
-        'color': Colors.red,
-      },
-      {
-        'icon': Icons.flight,
-        'name': 'Travel',
-        'color': Colors.green,
-      },
-    ];
-
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: interests.length,
+  Widget _buildTaggedGrid() {
+    return GridView.builder(
+      padding: EdgeInsets.zero,
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 3,
+        crossAxisSpacing: 1,
+        mainAxisSpacing: 1,
+      ),
+      itemCount: 6,
       itemBuilder: (context, index) {
-        final interest = interests[index];
-        return Card(
-          child: ListTile(
-            leading: CircleAvatar(
-              backgroundColor: interest['color'].withOpacity(0.2),
-              child: Icon(
-                interest['icon'],
-                color: interest['color'],
-              ),
-            ),
-            title: Text(
-              interest['name'],
-              style: GoogleFonts.poppins(
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            trailing: OutlinedButton(
-              onPressed: () {},
-              child: Text(
-                'View More',
-                style: GoogleFonts.poppins(),
-              ),
-            ),
-          ),
+        return Image.network(
+          'https://picsum.photos/300/300?random=${index + 100}',
+          fit: BoxFit.cover,
         );
       },
     );
@@ -349,7 +462,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
     bool overlapsContent,
   ) {
     return Container(
-      color: Theme.of(context).scaffoldBackgroundColor,
+      color: Colors.white,
       child: _tabBar,
     );
   }

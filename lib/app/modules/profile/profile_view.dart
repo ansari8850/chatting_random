@@ -1,7 +1,4 @@
-import 'package:chatting_application_agent/app/controllers/user_controller.dart';
-import 'package:chatting_application_agent/app/routes/app_pages.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class ProfileView extends StatefulWidget {
@@ -37,7 +34,7 @@ class _ProfileViewState extends State<ProfileView>
         title: Row(
           children: [
             Text(
-              'andrewmundy',
+              '2ezfluttermasteratif',
               style: GoogleFonts.poppins(
                 color: Colors.black,
                 fontSize: 20,
@@ -86,7 +83,7 @@ class _ProfileViewState extends State<ProfileView>
                             padding: const EdgeInsets.all(2),
                             child: CircleAvatar(
                               backgroundImage: NetworkImage(
-                                'https://ui-avatars.com/api/?name=Andrew+Mundy&background=random',
+                                'https://avatars.githubusercontent.com/u/76536042?v=4',
                               ),
                             ),
                           ),
@@ -96,9 +93,9 @@ class _ProfileViewState extends State<ProfileView>
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
-                              _buildStatColumn('1,487', 'Posts'),
-                              _buildStatColumn('898', 'Followers'),
-                              _buildStatColumn('1,310', 'Following'),
+                              _buildStatColumn('100', 'Posts'),
+                              _buildStatColumn('1M', 'Followers'),
+                              _buildStatColumn('10', 'Following'),
                             ],
                           ),
                         ),
@@ -111,14 +108,14 @@ class _ProfileViewState extends State<ProfileView>
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Andrew Mundy',
+                          'Ansari Atif',
                           style: GoogleFonts.poppins(
                             fontWeight: FontWeight.w600,
                           ),
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'Most of these photos are developed and scanned at home by hand ✌️ #olympusom2jl #35mm 📍',
+                          'Share the Reels with your Mobile App developer friends who wants to learn and develop Mobile Apps using Flutter.',
                           style: GoogleFonts.poppins(),
                         ),
                         const SizedBox(height: 4),
@@ -128,7 +125,7 @@ class _ProfileViewState extends State<ProfileView>
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'www.andrewmundy.net',
+                          'www.codewithatif.com',
                           style: GoogleFonts.poppins(
                             color: Colors.blue[800],
                           ),
